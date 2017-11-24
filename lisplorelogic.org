@@ -1,0 +1,171 @@
+#+TITLE: Lisp Lore Logic
+#+AUTHOR: 147Pm
+#+EMAIL: teilchen010.gmail.com
+# date ... will set (change) each time (if remembered)
+#+DATE: 2017-11-17T14:11:41
+#+FILETAGS: :LISPLORELOGIC:
+#+LANGUAGE:  en
+# #+INFOJS_OPT: view:showall ltoc:t mouse:underline path:http://orgmode.org/org-info.js
+#+HTML_HEAD: <link rel="stylesheet" href="../../data/stylesheet.css" type="text/css">
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+HTML_MATHJAX: align: left indent: 5em tagside: left font: Neo-Euler
+#+OPTIONS: H:10 num:4 toc:t \n:nil @:t ::t |:t _:{} *:t ^:{} prop:t
+#+OPTIONS: prop:t
+#+OPTIONS: tex:t
+#+STARTUP: showall
+#+STARTUP: align
+#+STARTUP: indent
+#+STARTUP: entitiespretty
+#+STARTUP: logdrawer
+#+STARTUP: hidestars
+
+#+html: \(\require{mhchem}\)
+
+* LISP LORE LOGIC
+
+
+** 2. Elementary Programming
+
+\rightarrow 2017-11-21T10:36:38 Logical Implication
+
+The /if---then/ chart
+
+| p | q | (p \Rightarrow q) |
+|---+---+---------|
+| T | T | T       |
+| T | F | F       |
+| F | T | T       |
+| F | F | T       |
+|   |   | <c>     |
+
+This slightly counter-intuitive, actually. The last row means a false premise implies a false conclusion:
+
+\[
+x = y \:\Rightarrow\: x + 1 = y + 1 \quad \textrm{e.g.} \quad 2 = 3 \:\Rightarrow\: 2 + 1 = 3 + 1 \\
+x = y \:\Rightarrow\: xz = yz \quad \textrm{e.g.} \quad 2 = 3 \:\Rightarrow\: 2\cdot1 = 3\cdot1 \\
+\]
+
+One conclusion is /a false statement implies anything/:
+
+/If elephants can fly (false), then the Cubs will win the World Series./ (true)
+
+/If elephants can fly (false), then the Cubs will lose the World Series./ (true)
+
+There is also /causal effect/:
+
+/If $\ce{HCl}$ and $\ce{NaOH}$ are combined, then $\ce{NaCl}$ will be produced./
+
+\[
+\ce{HCl + NaOH -> NaCl + H2O}
+\]
+
+Both the premise and the conclusion are true, hence, the statement is true. However, in this statement
+
+/If March has 31 days, then dogs are mammals./
+
+the premise has no causal relationship with the conclusion, and yet it is still true simply because both premise and conclusion are true.
+
+The only instance of a logical implication statement being false is the second row where the premise is true and the conclusion is false. This leads to the surprising conclusion that /the negation of an implication is an/ $\textrm{and}$ /statement/. Hence,
+
+\[
+\neg \: (p \:\Rightarrow\: q)
+\]
+
+is the same as 
+
+\[
+(p \:\land\: \neg \: q)
+\]
+
+For example, To negate /If I hit my thumb with a hammer, then my thumb will hurt/ is /I hit my thumb with a hammer and my thumb does not hurt/.
+
+| p | q | (p \Rightarrow q) | (\neg(p \Rightarrow q)) | (p \land \neg q) |
+|---+---+---------+------------+-----------|
+| T | T | T       | F          | F         |
+| T | F | F       | T          | T         |
+| F | T | T       | F          | F         |
+| F | F | T       | F          | F         |
+|   |   | <c>     | <c>        | <c>       |
+
+Another interesting thing about logical implication is that if we only look at the truth tables, we see how
+
+\[
+ (p \:\Rightarrow\: q)
+\]
+
+is the same as
+
+\[
+((\neg \: p)  \:\lor \: q)
+\]
+
+| p | q | (p \Rightarrow q) | (\neg p \lor q) | (p \lor q) |
+|---+---+---------+-----------+---------|
+| T | T | T       | T         | T       |
+| T | F | F       | F         | T       |
+| F | T | T       | T         | T       |
+| F | F | T       | T         | F       |
+|   |   | <c>     | <c>       | <c>     |
+
+Lisp has no /implies/ operator, but the fact that we can break logical implication down into ~not~ and ~and~ means we can say
+
+#+begin_src lisp :results silent
+(defun implies (p q)
+  (or (not p) q))
+#+end_src
+
+Remember, /true/ is ~t~ and /false/ is ~nil~ in Lisp:
+
+#+begin_src lisp :results raw
+(implies t nil)
+#+end_src
+
+#+RESULTS:
+NIL
+
+#+begin_src lisp 
+(implies nil nil)
+#+end_src
+
+#+RESULTS:
+T
+
+Problem: Given four cards...
+
+#+BEGIN_SRC ditaa :exports results :file wasoncards.png :cmdline -s 0.8
++---+  +---+  +---+  +---+
+|   |  |   |  |   |  |   |
+| E |  | K |  | 4 |  | 7 |
+|   |  |   |  |   |  |   |
++---+  +---+  +---+  +---+
+#+END_SRC
+
+#+RESULTS:
+[[file:/home/hercynian/org/lisp/elisp/wasoncards.png]]
+
+...which cards /must/ we turn over to check conclusively for the statement, /A vowel on one side (p) implies ($\Rightarrow$) an even number is on the other side (q)/?
+
+Let’s set up the truth table once again:
+
+| p | q | (p \Rightarrow q) |
+|---+---+---------|
+| T | T | T       |
+| T | F | F       |
+| F | T | T       |
+| F | F | T       |
+|   |   | <c>     |
+
+This problem actually uses the paradox that in two cases we still have /true/ statements even when the premises were /false/ (third and fourth rows). So, we begin by turning over /E/, which is definitely make-or-break. Why? Because if there is no even number on the other side, we are done, the statement fails on the very first card. This situation would be reflected by row two, i.e., $p : T, q : F \therefore  (p \:\Rightarrow\: q) : F$. But if it is in fact an even number, we have row one, i.e., $p : T, q : T \therefore (p \:\Rightarrow\: q) : T$ and we’re still in the game.
+
+Now, what about the next card /K/? This means $p : F$, because /K/ is not a vowel. Now we have the paradox of turning over /K/---and having it not matter if the other side is an even number ($q : T$) or an odd number ($q : F$). In either case the statement is true---in that odd paradoxical way, which in our case means it’s irrelevant. Why is the /K/ card irrelevant? Because the original statement is only concerned with what happens when we turn over a vowel. Again, rows three and four are true and this is inconsequential.
+
+So what about the next card /4/? Here we start with the second half of the statement being true, i.e., $q : T$. From our table we see row one might apply---or row three. But again, we’re faced with irrelevant information. Why? In the case where the other side is in fact a vowel ($p : T$), we have learned nothing new, since we already know the other side of /E/ was an even number. Now, what if the other side is a consonant ($p : F$)? Here we have row three, i.e., $p : F, q : T \therefore  (p \:\Rightarrow\: q) : T$. Again, this gives us no useful information about whether the original statement holds. Baffling? This is because our original statement doesn’t work in both directions. That is, when we check the cards, we are only concerned with whether a vowel on one side implies an even number on the other; /not/ whether an even number on one side implies a vowel on the other side. Later we’ll talk about when that is the case, i.e., both premise implies conclusion and conclusion implies premise. But for this problem order matters.
+
+Now, is the last card /7/ relevant? Can it tell us anything? As it happens, yes. Again, this is a case where we’re dealing with the conclusion and it is false: $q : F$. Which rows deal with a false $q$? Rows two and four. However, we /must/ have the opposite side of /7/ be a consonant (row four); otherwise, the statement fails, i.e., $q : F, p : F \therefore (p \:\Rightarrow\: q) : T$ must be the case. Again, we’re using row two to make the decision.
+
+In summary, it didn’t matter what was on the other sides of /K/ and /4/. /K/ was not a make-or-break card, neither, ironically, was /4/ simply because we weren’t checking the statement /conclusion implies premise/.
+
+If this is still fuzzy, consider another, possibly plainer situation with the statement: /You must be over age 21 to drink alcohol/. That is, the premise, /over 21/, implies the conclusion, /an alcoholic drink/. So let’s say we are in a bar and on the bar sits a glass of whiskey, next to it, a glass of lemonade, next, an old man drinking something and, next to him, someone in a hoodie who we can’t see drinking scotch. As before, we can immediately rule out the old man---because it doesn’t matter what he is drinking, he could drink alcoholic beverages or not. Also, it doesn’t matter who comes back from the restroom and drinks the lemonade, old enough for alcohol or not. However, it does matter who returns from playing pool and drinks the whiskey, likewise, it matters whether the obscured man is over 21.
+
+
