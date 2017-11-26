@@ -80,13 +80,13 @@ is the same as
 
 For example, To negate /If I hit my thumb with a hammer, then my thumb will hurt/ is /I hit my thumb with a hammer and my thumb does not hurt/.
 
-| p | q | (p \Rightarrow q) | (\neg(p \Rightarrow q)) | (p \land \neg q) |
-|---+---+---------+------------+-----------|
-| T | T | T       | F          | F         |
-| T | F | F       | T          | T         |
-| F | T | T       | F          | F         |
-| F | F | T       | F          | F         |
-|   |   | <c>     | <c>        | <c>       |
+| p | q | (p \Rightarrow q) | (\neg(p \Rightarrow q)) | (p \land (\neg q)) |
+|---+---+---------+------------+-------------|
+| T | T | T       | F          | F           |
+| T | F | F       | T          | T           |
+| F | T | T       | F          | F           |
+| F | F | T       | F          | F           |
+|   |   | <c>     | <c>        | <c>         |
 
 Another interesting thing about logical implication is that if we only look at the truth tables, we see how
 
@@ -100,15 +100,15 @@ is the same as
 ((\neg \: p)  \:\lor \: q)
 \]
 
-| p | q | (p \Rightarrow q) | (\neg p \lor q) | (p \lor q) |
-|---+---+---------+-----------+---------|
-| T | T | T       | T         | T       |
-| T | F | F       | F         | T       |
-| F | T | T       | T         | T       |
-| F | F | T       | T         | F       |
-|   |   | <c>     | <c>       | <c>     |
+| p | q | (p \Rightarrow q) | ((\neg p) \lor q) | (p \lor q) |
+|---+---+---------+-------------+---------|
+| T | T | T       | T           | T       |
+| T | F | F       | F           | T       |
+| F | T | T       | T           | T       |
+| F | F | T       | T           | F       |
+|   |   | <c>     | <c>         | <c>     |
 
-Lisp has no /implies/ operator, but the fact that we can break logical implication down into ~not~ and ~and~ means we can say
+Lisp has no /implies/ operator, but the fact that we can break logical implication down into ~not~ and ~and~[fn:1] means we can say
 
 #+begin_src lisp :results silent
 (defun implies (p q)
@@ -131,7 +131,7 @@ NIL
 #+RESULTS:
 T
 
-Problem: Given four cards...
+Example: Given four cards...
 
 #+BEGIN_SRC ditaa :exports results :file wasoncards.png :cmdline -s 0.8
 +---+  +---+  +---+  +---+
@@ -144,9 +144,9 @@ Problem: Given four cards...
 #+RESULTS:
 [[file:/home/hercynian/org/lisp/elisp/wasoncards.png]]
 
-...which cards /must/ we turn over to check conclusively for the statement, /A vowel on one side (p) implies ($\Rightarrow$) an even number is on the other side (q)/?
+...which cards /must/ we turn over to check conclusively if the statement, /A vowel on one side (p) implies ($\Rightarrow$) an even number is on the other side (q)/ holds for these cards?
 
-Let’s set up the truth table once again:
+We set up the truth table once again:
 
 | p | q | (p \Rightarrow q) |
 |---+---+---------|
@@ -156,16 +156,45 @@ Let’s set up the truth table once again:
 | F | F | T       |
 |   |   | <c>     |
 
-This problem actually uses the paradox that in two cases we still have /true/ statements even when the premises were /false/ (third and fourth rows). So, we begin by turning over /E/, which is definitely make-or-break. Why? Because if there is no even number on the other side, we are done, the statement fails on the very first card. This situation would be reflected by row two, i.e., $p : T, q : F \therefore  (p \:\Rightarrow\: q) : F$. But if it is in fact an even number, we have row one, i.e., $p : T, q : T \therefore (p \:\Rightarrow\: q) : T$ and we’re still in the game.
+Let us revisit the paradox that in two cases the implication is still /true/ even when the premises were /false/ (rows three and four). So, we begin by turning over /E/, which is definitely make-or-break. Why? Because if there is no even number on the other side, we are done, the implication fails on the very first card. This situation would be reflected by row two, i.e., $p : T, q : F \therefore  (p \:\Rightarrow\: q) : F$. But if it is in fact an even number, row one is applicable, i.e., $p : T, q : T \therefore (p \:\Rightarrow\: q) : T$ and we’re still in the game.
 
-Now, what about the next card /K/? This means $p : F$, because /K/ is not a vowel. Now we have the paradox of turning over /K/---and having it not matter if the other side is an even number ($q : T$) or an odd number ($q : F$). In either case the statement is true---in that odd paradoxical way, which in our case means it’s irrelevant. Why is the /K/ card irrelevant? Because the original statement is only concerned with what happens when we turn over a vowel. Again, rows three and four are true and this is inconsequential.
+Now, what about the next card /K/? This means the premise is false, $p : F$, because /K/ is not a vowel. So we have the paradox of turning over /K/---and having it not matter if the other side is an even number ($q : T$) or an odd number ($q : F$). In either case the statement is true---in that odd paradoxical way, which in our case means the implication being true is irrelevant. Why is the /K/ card irrelevant? Because the original implication statement is only concerned with what happens when we turn over a vowel. Again, rows three and four are true and this is inconsequential.
 
-So what about the next card /4/? Here we start with the second half of the statement being true, i.e., $q : T$. From our table we see row one might apply---or row three. But again, we’re faced with irrelevant information. Why? In the case where the other side is in fact a vowel ($p : T$), we have learned nothing new, since we already know the other side of /E/ was an even number. Now, what if the other side is a consonant ($p : F$)? Here we have row three, i.e., $p : F, q : T \therefore  (p \:\Rightarrow\: q) : T$. Again, this gives us no useful information about whether the original statement holds. Baffling? This is because our original statement doesn’t work in both directions. That is, when we check the cards, we are only concerned with whether a vowel on one side implies an even number on the other; /not/ whether an even number on one side implies a vowel on the other side. Later we’ll talk about when that is the case, i.e., both premise implies conclusion and conclusion implies premise. But for this problem order matters.
+So what about the next card /4/? Here we start with the second half of the statement being true, i.e., $q : T$. From our table we see row one might apply---or row three. But again, we’re faced with irrelevant information. Why? If the other side is in fact a vowel ($p : T$), we have learned nothing new, since we already know the other side of /E/ was an even number. Now, what if the other side is a consonant ($p : F$)? Here we have row three, i.e., $p : F, q : T \therefore  (p \:\Rightarrow\: q) : T$. Again, this gives us no useful information about whether the original statement holds. Baffling? This is because our original statement doesn’t work in both directions. That is, when we check the cards, we are only concerned with whether a vowel on one side implies an even number on the other; /not/ whether an even number on one side implies a vowel on the other side. This would be the /converse/. Later we’ll talk about when both premise implies conclusion and conclusion implies premise. But for this problem order matters
 
-Now, is the last card /7/ relevant? Can it tell us anything? As it happens, yes. Again, this is a case where we’re dealing with the conclusion and it is false: $q : F$. Which rows deal with a false $q$? Rows two and four. However, we /must/ have the opposite side of /7/ be a consonant (row four); otherwise, the statement fails, i.e., $q : F, p : F \therefore (p \:\Rightarrow\: q) : T$ must be the case. Again, we’re using row two to make the decision.
+Finally, is the last card /7/ relevant? Can it tell us anything? As it happens, yes. Again, this is a case where we’re dealing with the conclusion and it is false: $q : F$. Which rows deal with a false $q$? Rows two and four. However, we /must/ have the opposite side of /7/ be a consonant (row four); otherwise, the implication statement fails, i.e., $q : F, p : F \therefore (p \:\Rightarrow\: q) : T$ must be the case. Again, we’re using row two to make the decision.
 
-In summary, it didn’t matter what was on the other sides of /K/ and /4/. /K/ was not a make-or-break card, neither, ironically, was /4/ simply because we weren’t checking the statement /conclusion implies premise/.
+In summary, it didn’t matter what was on the other sides of /K/ and /4/. /K/ was not a make-or-break card, neither, ironically, was /4/ simply because we weren’t checking the statement /conclusion implies premise/. The /7/ was an odd situation, because we needed the false conclusion ($q : F$) to have an accompanying false premise ($p : F$), i.e., an odd card needed to have a consonant reverse side in order for the implication statement to hold. Had it not, the row two would have doomed the statement.
 
-If this is still fuzzy, consider another, possibly plainer situation with the statement: /You must be over age 21 to drink alcohol/. That is, the premise, /over 21/, implies the conclusion, /an alcoholic drink/. So let’s say we are in a bar and on the bar sits a glass of whiskey, next to it, a glass of lemonade, next, an old man drinking something and, next to him, someone in a hoodie who we can’t see drinking scotch. As before, we can immediately rule out the old man---because it doesn’t matter what he is drinking, he could drink alcoholic beverages or not. Also, it doesn’t matter who comes back from the restroom and drinks the lemonade, old enough for alcohol or not. However, it does matter who returns from playing pool and drinks the whiskey, likewise, it matters whether the obscured man is over 21.
+If this is still fuzzy, consider another, possibly plainer situation with the implication statement: /To legally drink alcohol you must be at least 21 years of age/. That is, the premise, /legally drink alcohol/, implies the conclusion, /drinker is at least 21/. So let’s say we are in a bar and on the bar sits a glass of whiskey, next to it, a glass of lemonade, next, an old man drinking /something/ and, next to him, someone in a hoodie who we can’t see drinking scotch. We can immediately rule out the old man---because it doesn’t matter what he is drinking, he could drink alcoholic beverages or not. Also, it doesn’t matter who comes back from the restroom and drinks the lemonade, old enough for alcohol or not. However, it does matter who returns from playing pool and drinks the whiskey, likewise, it matters whether the obscured man is over 21. With the glass of whiskey we have $p : T$, hence, we must have a drinker at least 21, i.e., $q : T$. If not, we have row two, and the implication fails. With the lemonade we have $p : F$, i.e., not alcohol, but then it doesn’t matter if the drinker is at least 21; hence, rows three and four apply, meaning irrelevancy. Same with the old man ($q : T$), which means rows one and three apply, hence, not relevant. But since the obscured man ($q : ?$) is drinking scotch ($p : T$), we must have $q : T$ and not row two, $q : F$.
+
+The next question we might ask is, can we somehow represent this process in Lisp? With Lisp we created the ~implies~ function, using the fact that $(p \:\Rightarrow\: q)$ is the same as $((\neg \: p)  \:\lor \: q)$. Why is this true? Because both versions produce the same truth table. Perhaps we should understand what exactly needs to be asked.
+
+* Footnotes
+
+[fn:1] ~not~ is /logical not/, i.e., if $x$ is true, then $\neg x$ is the opposite, false. Likewise, if $x$ is false, then $\neg x$ is, again, the opposite, true.
+
+| x | (\neg x) |
+| T | F     |
+| F | T     |
+|   | <c>   |
+
+~or~ is /logical or/, i.e., if $x$ /or/ $y$ is true, then $x \lor y$ is true. This has the [] that both $x$ and $y$ have to be false for $x \lor y$ to be false.
+
+| x | y | (x \lor y) |
+| T | T | T       |
+| T | F | T       |
+| F | T | T       |
+| F | F | F       |
+|   |   | <c>     |
+
+~and~ is /logical and/, i.e., /both/ $x$ and $y$ must be true for $x \land y$ to be true. In fact, if either or both $x$ and $y$ are false, then $x \land y$ is false. This means $x : T$ /and/ $x : T$ must hold for $x \land y$ to be true
+
+| x | y | (x \land y) |
+| T | T | T       |
+| T | F | F       |
+| F | T | F       |
+| F | F | F       |
+|   |   | <c>     |
 
 
