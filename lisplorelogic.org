@@ -26,6 +26,19 @@
 
 
 ** 2. Elementary Programming
+:LOGBOOK:
+- [2017-11-26 Sun 10:06] \\
+  Latex code for material inference table:
+  #+BEGIN_EXAMPLE
+  \begin{array}{ c | c || c | c |}
+    p & q & p\rightarrow q & \lnot(p\rightarrow q) \\ \hline
+    \text T & \text T & \text T & \text F\\
+    \text T & \text F & \text F & \text T \\
+    \text F & \text T & \text T & \text F \\
+    \text F & \text F & \text T & \text F 
+  \end{array}
+  #+END_EXAMPLE
+:END:
 
 \rightarrow 2017-11-21T10:36:38 Logical Implication
 
@@ -168,7 +181,43 @@ In summary, it didn’t matter what was on the other sides of /K/ and /4/. /K/ w
 
 If this is still fuzzy, consider another, possibly plainer situation with the implication statement: /To legally drink alcohol you must be at least 21 years of age/. That is, the premise, /legally drink alcohol/, implies the conclusion, /drinker is at least 21/. So let’s say we are in a bar and on the bar sits a glass of whiskey, next to it, a glass of lemonade, next, an old man drinking /something/ and, next to him, someone in a hoodie who we can’t see drinking scotch. We can immediately rule out the old man---because it doesn’t matter what he is drinking, he could drink alcoholic beverages or not. Also, it doesn’t matter who comes back from the restroom and drinks the lemonade, old enough for alcohol or not. However, it does matter who returns from playing pool and drinks the whiskey, likewise, it matters whether the obscured man is over 21. With the glass of whiskey we have $p : T$, hence, we must have a drinker at least 21, i.e., $q : T$. If not, we have row two, and the implication fails. With the lemonade we have $p : F$, i.e., not alcohol, but then it doesn’t matter if the drinker is at least 21; hence, rows three and four apply, meaning irrelevancy. Same with the old man ($q : T$), which means rows one and three apply, hence, not relevant. But since the obscured man ($q : ?$) is drinking scotch ($p : T$), we must have $q : T$ and not row two, $q : F$.
 
-The next question we might ask is, can we somehow represent this process in Lisp? With Lisp we created the ~implies~ function, using the fact that $(p \:\Rightarrow\: q)$ is the same as $((\neg \: p)  \:\lor \: q)$. Why is this true? Because both versions produce the same truth table. Perhaps we should understand what exactly needs to be asked.
+The next question we might ask is, can we somehow represent this process in Lisp? With Lisp we created the ~implies~ function, using the fact that $(p \:\Rightarrow\: q)$ is the same as $((\neg \: p)  \:\lor \: q)$. Why is this true? Because both versions produce the same truth table. This means both will reach the same conclusions. But then how many instances of the situation must we investigate to know if the implication holds? Perhaps we should understand what exactly needs to be asked....
+
+Let’s start with some way to generate a set for consideration. In the case of the cards, we might generate a deck with each card either a vowel or consonant on one side and the respective even or odd number on the other. Perhaps we flip and shuffle the cards. Then “go through” the deck checking for any card that did not correspond to /vowel implies even/. To make things interesting, we might throw in the occasional game-breaker, i.e., a /consonant-even/ or a /vowel-odd/ card.
+
+In set theory we might describe our deck as /the set of letter-integer pairs such that vowels are paired with even numbers and consonants are paired with odd numbers./ This might be formalized so:
+
+\[
+\text{for} \: C_v = \{A,E,I,O,U,Y\} \: \text{and} \: C_c = \{B,C,D,F,G,H,J,K,L,M,N,P,Q,R,S,T,V,W,X,Z\} \\
+ \: \text{and} \: C_e = \{2,4,6,8,10,12\}  \: \text{and} \: C_o = \{1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39\} \\
+D = \{( | \}
+\]
+
+
+
+#+begin_src lisp :results silent
+(defun wason-deck (lst)
+  (let ((wdlst ()))
+    (labels ((conso-vowel (lst)
+                          
+#+end_src
+
+
+
+
+#+begin_src lisp :results silent
+(defun lfact (n)
+  (labels ((tail-recursive-fact (counter accumulator)
+             (if (> counter n)
+                 accumulator
+                 (tail-recursive-fact (1+ counter)
+                                      (* counter accumulator)))))
+    (tail-recursive-fact 1 1)))
+#+end_src
+
+
+
+
 
 * Footnotes
 
