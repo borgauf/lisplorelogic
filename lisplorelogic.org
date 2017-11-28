@@ -194,16 +194,87 @@ D = \{( | \}
 \]
 
 
-
 #+begin_src lisp :results silent
 (defun wason-deck (lst)
-  (let ((wdlst ()))
-    (labels ((conso-vowel (lst)
-                          
+  "This `consolst` and `vowlist` building is unnecessary, but a good exercise"
+  (let ((consolst (remove 'NIL (mapcar (lambda (x) (find x '(b c d f g h j k l m n p q r s t v w x y z))) lst)))
+        (vowlst (remove 'NIL (mapcar (lambda (x) (find x '(a e i o))) lst))))
+                                        ;(consodeck '())
+                                        ;(decklist '()))
+    (flet ((make-consodeck ()
+                           (mapcar (lambda (x) (let ((num (random 54)))
+                                                 (cons x (if (evenp num)
+                                                             (1+ num)
+                                                           num)))) consolst))
+           (make-voweldeck () 
+                           (mapcar (lambda (x) (let ((num (random 54)))
+                                                 (cons x (if (oddp num)
+                                                             (1+ num)
+                                                           num)))) vowlst)))
+      (append (make-consodeck) (make-voweldeck)))))
 #+end_src
 
+#+begin_src lisp
+(mapcar (lambda (x) (cons x (if (evenp (char-code (char (string x) 0))) (1+ (char-code (char (string x) 0))) (char-code (char (string x) 0))))) '(a b c d e f g h i j k l m n o p q r s t u v w x y z))
+#+end_src
+
+#+RESULTS:
+: ((A . 65) (B . 67) (C . 67) (D . 69) (E . 69) (F . 71) (G . 71) (H . 73) (I . 73) (J . 75) (K . 75) (L . 77) (M . 77) (N . 79) (O . 79) (P . 81) (Q . 81) (R . 83) (S . 83) (T . 85) (U . 85) (V . 87) (W . 87) (X . 89) (Y . 89) (Z . 91))
+
+#+begin_src lisp
+(defun random-odd ()
+  (let ((num 0))
+    (if (evenp (setf num (random 299)))
+        (1+ num)
+      num)))
+(random-odd)
+#+end_src
+
+#+RESULTS:
+: 259
+
+#+begin_src lisp
+(mapcar #'(lambda (x)
+    (let ((num (random 299)))
+      (cons x (if (evenp num)
+          (1+ num)
+        num))))
+'(a b c d e f))
+#+end_src
+
+#+RESULTS:
+: ((A . 219) (B . 149) (C . 39) (D . 225) (E . 11) (F . 29))
+
+#+begin_src lisp
+(let ((num 1)) (mapcar (lambda (x) (cons x (if (evenp (setf num (random 299))) (1+ num) (num)))) '(a b c d e f g h i j k l m n o p q r s t u v w x y z)))
+#+end_src
+
+#+RESULTS:
+: ((A . 37) (B . 283) (C . 232) (D . 251) (E . 273) (F . 170) (G . 25) (H . 92) (I . 174) (J . 173) (K . 144) (L . 110) (M . 92) (N . 206) (O . 51) (P . 19) (Q . 177) (R . 202) (S . 72) (T . 238) (U . 72) (V . 231) (W . 171) (X . 147) (Y . 142) (Z . 8))
 
 
+
+#+begin_src lisp
+(flet ((sin2x (x) (sin (* 2 x)))
+       (cos2x (x) (cos (* 2 x))))
+ (+ (sin2x 0.2) (cos2x 0.2)))
+#+end_src
+
+#+RESULTS:
+: 1.3104793
+
+#+begin_src lisp :results silent
+(defun collect-leaves (tree)
+  (let ((leaves ()))
+    (labels ((walk (tree)
+               (cond
+                 ((null tree))
+                 ((atom tree) (push tree leaves))
+                 (t (walk (car tree))
+                    (walk (cdr tree))))))
+      (walk tree))
+    (nreverse leaves)))
+#+end_src
 
 #+begin_src lisp :results silent
 (defun lfact (n)
