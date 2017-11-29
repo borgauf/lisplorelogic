@@ -1,0 +1,102 @@
+#+TITLE: \zwnj^{147}Pm Lisp
+#+AUTHOR: 147Pm
+#+EMAIL: borgauf@sdf.org
+#+DATE 2017-01-29T20:27:05
+#+FILETAGS: :lisp
+#+LANGUAGE:  en
+# #+INFOJS_OPT: view:showall ltoc:t mouse:underline path:http://orgmode.org/org-info.js
+#+HTML_HEAD: <link rel="stylesheet" href="../data/stylesheet.css" type="text/css">
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+OPTIONS: H:10 num:4 toc:nil \n:nil @:t ::t |:t _:{} *:t ^:{} prop:t
+#+OPTIONS: prop:t
+# This makes MathJax not work
+# #+OPTIONS: tex:imagemagick
+# this makes MathJax work
+#+OPTIONS: tex:t
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS: [american]
+# Setup tikz package for both LaTeX and HTML export:
+#+LATEX_HEADER: \usepackage{tikz}
+#+LATEX_HEADER: \usepackage{commath}
+#+LaTeX_HEADER: \usepackage{pgfplots}
+#+LaTeX_HEADER: \usepackage{sansmath}
+#+LaTeX_HEADER: \usepackage{mathtools}
+# #+HTML_MATHJAX: align: left indent: 5em tagside: left font: Neo-Euler
+#+PROPERTY: header-args:latex+ :packages '(("" "tikz"))
+#
+#+PROPERTY: header-args:latex+ :imagemagick (by-backend (latex nil) (t "yes"))
+#+PROPERTY: header-args:latex+ :exports results :fit yes
+#
+#+STARTUP: showall
+#+STARTUP: align
+#+STARTUP: indent
+#+STARTUP: entitiespretty
+#+STARTUP: logdrawer
+
+* LISP AUXILIARY
+
+\rightarrow 2017-11-29T10:44:48 details of Wason deck
+
+From [[http://jtra.cz/stuff/lisp/sclr/flet.html][Jakub Trávník]]:
+
+#+begin_src lisp :results silent
+(flet ((sin2x (x) (sin (* 2 x)))
+       (cos2x (x) (cos (* 2 x))))
+  (+ (sin2x 0.2) (cos2x 0.2)))
+#+end_src
+
+~swap~ and ~shuffle~ are embedded in ~wason-deck~. ~shuffle~ uses a random number generator to 
+
+#+begin_src lisp :results silent
+(defun swap (lst el1 el2)
+  "in lst swap indices el1 and el2 in place (~elt~ similar to ~nth~)"
+  (let ((tmp (elt lst el1)))
+    (setf (elt lst el1) (elt lst el2))
+    (setf (elt lst el2) tmp)))
+#+end_src
+
+#+begin_src lisp :results silent
+(defun shuffle (lst)
+  "Shuffle the elements in lst.
+shuffling is done in place."
+  (loop for i in (reverse (range (length lst) :min 1))
+     do (let ((j (random (+ i 1))))
+          (swap lst i j)))
+  lst)
+#+end_src
+
+My Wason card tricks:
+
+#+begin_src lisp :results silent
+(defun wason-deck (lst)
+  "This `consolst` and `vowlist` building is unnecessary, but a good exercise"
+  (let ((consolst (remove 'NIL (mapcar (lambda (x) (find x '(b c d f g h j k l m n p q r s t v w x y z))) lst)))
+        (vowlst (remove 'NIL (mapcar (lambda (x) (find x '(a e i o))) lst))))
+
+    (flet ((make-consodeck ()
+             (mapcar (lambda (x) (let ((num (random 54)))
+                                   (cons x (if (evenp num)
+                                               (1+ num)
+                                               num)))) consolst))
+           (make-voweldeck () 
+             (mapcar (lambda (x) (let ((num (random 54)))
+                                   (cons x (if (oddp num)
+                                               (1+ num)
+                                               num)))) vowlst))
+           (swap (slst el1 el2)
+             (let  ((tmp (elt slst el1)))
+               (setf (elt slst el1) (elt slst el2))
+               (setf (elt slst el2) tmp)))
+
+           (shuffle (slst)
+             (loop for i in (reverse (range (length slst) :min 1))
+                do (let ((j (random (+ i 1))))
+                     (swap slst i j)))
+             slst)
+
+           )
+      (shuffle (append (make-consodeck) (make-voweldeck))))))
+#+end_src
+
+
