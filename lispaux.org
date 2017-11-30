@@ -1,3 +1,4 @@
+# -*- org-confirm-babel-evaluate: nil -*-
 #+TITLE: \zwnj^{147}Pm Lisp
 #+AUTHOR: 147Pm
 #+EMAIL: borgauf@sdf.org
@@ -84,7 +85,7 @@ My Wason card tricks:
          (consolst (remove 'NIL (mapcar (lambda (x) (find x consonents)) alphab)))
          (vowlst (remove 'NIL (mapcar (lambda (x) (find x '(a e i o))) alphab))))
 
-    (flet ((make-consodeck ()
+    (labels ((make-consodeck ()
                            (mapcar (lambda (x) (let ((num (random 54)))
                                                  (cons x (if (evenp num)
                                                              (1+ num)
@@ -106,14 +107,24 @@ My Wason card tricks:
                     slst)
            (flip (flst)
                  (mapcar (lambda (x) (let ((num (random 2)))
-                                       (if (= num 0)
-                                           (psetf (cdr x) (car x) (car x) (cdr x))))) flst))
-                                        
-                                           
-                                           
+                                       (if (zerop num)
+                                           (cons (cdr x) (car x))
+                                         x))) flst)))
+           (flip (shuffle (append (make-consodeck) (make-voweldeck)))))))
+#+end_src
 
-                                           )
-                                       (shuffle (append (make-consodeck) (make-voweldeck))))))
+
+\rightarrow 2017-11-30T15:30:04 ~flet~ and ~labels~
+
+Before, ~wason-deck used ~flet~, however, ~swap~ had been defined and evaluated outside, hence, ~flet~ worked. However, ~flet~ does not allow referencing of one internal function by another. This means we had to switch to ~labels~.
+
+#+begin_src lisp :results raw
+(mapcar (lambda (pair)
+                       (if (= (random 2) 0)
+                           (cons (cdr pair)
+                                 (car pair))
+                         pair))
+                     '((B . 21) (O . 24) (P . 15) (R . 47) (K . 49)))
 #+end_src
 
 Now we need to randomly "flip" the cards, which means reverse the atoms in the dotted pairs.
