@@ -1,8 +1,8 @@
 #+TITLE: \zwnj^{147}Pm Lisp
 #+AUTHOR: 147Pm
 #+EMAIL: borgauf@sdf.org
-#+DATE 2017-01-29T20:27:05
-#+FILETAGS: :lisp
+#+DATE: 2017-11-29T11:20:22
+#+FILETAGS: :lispaux:
 #+LANGUAGE:  en
 # #+INFOJS_OPT: view:showall ltoc:t mouse:underline path:http://orgmode.org/org-info.js
 #+HTML_HEAD: <link rel="stylesheet" href="../data/stylesheet.css" type="text/css">
@@ -66,37 +66,58 @@ shuffling is done in place."
   lst)
 #+end_src
 
+A sequence generator in the [[http://kitchingroup.cheme.cmu.edu/blog/2014/09/06/Randomize-a-list-in-Emacs/][original]] ~shuffle~ code used elisp's  ~number-sequence~. We replace with [[https://stackoverflow.com/questions/13937520/pythons-range-analog-in-common-lisp][this]] ~range~:
+
+#+begin_src lisp :results silent
+(defun range (max &key (min 0) (step 1))
+  (loop for n from min below max by step
+     collect n))
+#+end_src
+
 My Wason card tricks:
 
 #+begin_src lisp :results silent
-(defun wason-deck (lst)
+(defun wason-deck ()
   "This `consolst` and `vowlist` building is unnecessary, but a good exercise"
-  (let ((consolst (remove 'NIL (mapcar (lambda (x) (find x '(b c d f g h j k l m n p q r s t v w x y z))) lst)))
-        (vowlst (remove 'NIL (mapcar (lambda (x) (find x '(a e i o))) lst))))
+  (let* ((alphab '(a b c d e f g h i j k l m n o p q r s t u v w x y z))
+         (consonents '(b c d f g h j k l m n p q r s t v w x y z))
+         (consolst (remove 'NIL (mapcar (lambda (x) (find x consonents)) alphab)))
+         (vowlst (remove 'NIL (mapcar (lambda (x) (find x '(a e i o))) alphab))))
 
     (flet ((make-consodeck ()
-             (mapcar (lambda (x) (let ((num (random 54)))
-                                   (cons x (if (evenp num)
-                                               (1+ num)
-                                               num)))) consolst))
+                           (mapcar (lambda (x) (let ((num (random 54)))
+                                                 (cons x (if (evenp num)
+                                                             (1+ num)
+                                                           num)))) consolst))
            (make-voweldeck () 
-             (mapcar (lambda (x) (let ((num (random 54)))
-                                   (cons x (if (oddp num)
-                                               (1+ num)
-                                               num)))) vowlst))
+                           (mapcar (lambda (x) (let ((num (random 54)))
+                                                 (cons x (if (oddp num)
+                                                             (1+ num)
+                                                           num)))) vowlst))
            (swap (slst el1 el2)
-             (let  ((tmp (elt slst el1)))
-               (setf (elt slst el1) (elt slst el2))
-               (setf (elt slst el2) tmp)))
+                 (let  ((tmp (elt slst el1)))
+                   (setf (elt slst el1) (elt slst el2))
+                   (setf (elt slst el2) tmp)))
 
            (shuffle (slst)
-             (loop for i in (reverse (range (length slst) :min 1))
-                do (let ((j (random (+ i 1))))
-                     (swap slst i j)))
-             slst)
+                    (loop for i in (reverse (range (length slst) :min 1))
+                          do (let ((j (random (+ i 1))))
+                               (swap slst i j)))
+                    slst)
+           (flip (flst)
+                 (mapcar (lambda (x) (let ((num (random 2)))
+                                       (if (= num 0)
+                                           (psetf (cdr x) (car x) (car x) (cdr x))))) flst))
+                                        
+                                           
+                                           
 
-           )
-      (shuffle (append (make-consodeck) (make-voweldeck))))))
+                                           )
+                                       (shuffle (append (make-consodeck) (make-voweldeck))))))
 #+end_src
+
+Now we need to randomly "flip" the cards, which means reverse the atoms in the dotted pairs.
+
+
 
 

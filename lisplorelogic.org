@@ -193,50 +193,21 @@ In set theory we might describe our deck as /the set of letter-integer pairs suc
 D = \{( | \}
 \]
 
-
-#+begin_src lisp :results silent
-(defun wason-deck ()
-  "This `consolst` and `vowlist` building is unnecessary, but a good exercise"
-  (let* ((alphab '(a b c d e f g h i j k l m n o p q r s t u v w x y z))
-        (consolst (remove 'NIL (mapcar (lambda (x) (find x '(b c d f g h j k l m n p q r s t v w x y z))) alphab)))
-        (vowlst (remove 'NIL (mapcar (lambda (x) (find x '(a e i o))) alphab))))
-
-    (flet ((make-consodeck ()
-             (mapcar (lambda (x) (let ((num (random 54)))
-                                   (cons x (if (evenp num)
-                                               (1+ num)
-                                               num)))) consolst))
-           (make-voweldeck () 
-             (mapcar (lambda (x) (let ((num (random 54)))
-                                   (cons x (if (oddp num)
-                                               (1+ num)
-                                               num)))) vowlst))
-           (swap (slst el1 el2)
-             (let  ((tmp (elt slst el1)))
-               (setf (elt slst el1) (elt slst el2))
-               (setf (elt slst el2) tmp)))
-
-           (shuffle (slst)
-             (loop for i in (reverse (range (length slst) :min 1))
-                do (let ((j (random (+ i 1))))
-                     (swap slst i j)))
-             slst)
-
-           )
-      (shuffle (append (make-consodeck) (make-voweldeck))))))
-#+end_src
+Create a Wason deck:
 
 #+begin_src lisp :results raw
 (wason-deck)
 #+end_src
 
 #+RESULTS:
-((Q . 23) (G . 43) (J . 43) (I . 40) (C . 35) (P . 49) (T . 15) (E . 38)
- (W . 29) (S . 33) (M . 15) (O . 2) (F . 43) (A . 2) (Z . 1) (K . 15) (D . 41)
- (X . 37) (L . 29) (H . 35) (N . 27) (R . 33) (Y . 23) (B . 53) (V . 41))
+((B . 21) (O . 24) (P . 15) (R . 47) (G . 9) (J . 43) (Z . 25) (V . 49)
+ (T . 29) (W . 21) (D . 39) (A . 42) (Q . 11) (M . 3) (I . 32) (E . 28)
+ (L . 41) (Y . 33) (H . 47) (N . 53) (X . 25) (S . 47) (F . 11) (C . 13)
+ (K . 49))
 
 
-See below for the ~swap~ and ~shuffle~ ideas used above (See [[http://kitchingroup.cheme.cmu.edu/blog/2014/09/06/Randomize-a-list-in-Emacs/][this]] for the original idea)[fn:2]
+
+See [[file:~/org/lisp/LispLoreLogic/lispaux.org][Lisp Auxiliary]] for supporting Lisp code.
 
 
 
@@ -270,7 +241,7 @@ Basic creation of an odd (non-even) random number:
 #+RESULTS:
 : 259
 
-Basic ~cons~\ing on of a random odd number to the inputted list:
+Basic ~cons~ing on of a random odd number to the inputted list:
 
 #+begin_src lisp
 "Basic consing on of a random odd number to the inputted list"
@@ -330,32 +301,6 @@ Basic ~cons~\ing on of a random odd number to the inputted list:
 
 
 * Footnotes
-
-[fn:2] ~swap~, ~shuffle~, and an inspirational  ~flet~ example:
-
-#+begin_src lisp :results silent
-(defun swap (lst el1 el2)
-  "in lst swap indices el1 and el2 in place (~elt~ similar to ~nth~)"
-  (let ((tmp (elt lst el1)))
-    (setf (elt lst el1) (elt lst el2))
-    (setf (elt lst el2) tmp)))
-#+end_src
-
-#+begin_src lisp :results silent
-(defun shuffle (lst)
-  "Shuffle the elements in lst.
-shuffling is done in place."
-  (loop for i in (reverse (range (length lst) :min 1))
-     do (let ((j (random (+ i 1))))
-          (swap lst i j)))
-  lst)
-#+end_src
-
-#+begin_src lisp
-(flet ((sin2x (x) (sin (* 2 x)))
-       (cos2x (x) (cos (* 2 x))))
- (+ (sin2x 0.2) (cos2x 0.2)))
-#+end_src
 
 [fn:1] ~not~ is /logical not/, i.e., if $x$ is true, then $\neg x$ is the opposite, false. Likewise, if $x$ is false, then $\neg x$ is, again, the opposite, true.
 
