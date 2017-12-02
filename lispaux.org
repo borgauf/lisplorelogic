@@ -1,4 +1,4 @@
-# -*- org-confirm-babel-evaluate: nil -*-
+# -*- org-confirm-babel-evaluate: t -*-
 #+TITLE: \zwnj^{147}Pm Lisp
 #+AUTHOR: 147Pm
 #+EMAIL: borgauf@sdf.org
@@ -113,10 +113,55 @@ My Wason card tricks:
            (flip (shuffle (append (make-consodeck) (make-voweldeck)))))))
 #+end_src
 
+#+begin_src lisp :results silent
+(defun wason-deck2 (&optional (p 0))
+  "This `consolst` and `vowlist` building is unnecessary, but a good exercise"
+  (let* ((alphab '(a b c d e f g h i j k l m n o p q r s t u v w x y z))
+         (consonents '(b c d f g h j k l m n p q r s t v w x y z))
+         (consolst (remove 'NIL (mapcar (lambda (x) (find x consonents)) alphab)))
+         (vowlst (remove 'NIL (mapcar (lambda (x) (find x '(a e i o))) alphab)))
+         (wdeck '()))
+
+    (labels ((make-consodeck ()
+               (mapcar (lambda (x) (let ((num (random 54)))
+                                     (cons x (if (evenp num)
+                                                 (1+ num)
+                                                 num)))) consolst))
+             (make-voweldeck () 
+               (mapcar (lambda (x) (let ((num (random 54)))
+                                     (cons x (if (oddp num)
+                                                 (1+ num)
+                                                 num)))) vowlst))
+             (swap (slst el1 el2)
+               (let  ((tmp (elt slst el1)))
+                 (setf (elt slst el1) (elt slst el2))
+                 (setf (elt slst el2) tmp)))
+
+             (shuffle (slst)
+               (loop for i in (reverse (range (length slst) :min 1))
+                  do (let ((j (random (+ i 1))))
+                       (swap slst i j)))
+               slst)
+             (flip (flst)
+               (mapcar (lambda (x) (let ((num (random 2)))
+                                     (if (zerop num)
+                                         (cons (cdr x) (car x))
+                                         x))) flst)))
+      (setf wdeck (flip (shuffle (append (make-consodeck) (make-voweldeck)))))
+      
+      (if (zerop p) wdeck
+          (mapcar (lambda (x) (let ((num (random 6)))
+                                (cond ((and (zerop num) (numberp (car x))) (cons (1+ (car x)) (cdr x)))
+                                      ((and (zerop num) (numberp (cdr x))) (cons (car x) (1+ (cdr x))))
+                                      (t x)))) wdeck)))))
+#+end_src
 
 \rightarrow 2017-11-30T15:30:04 ~flet~ and ~labels~
 
 Before, ~wason-deck used ~flet~, however, ~swap~ had been defined and evaluated outside, hence, ~flet~ worked. However, ~flet~ does not allow referencing of one internal function by another. This means we had to switch to ~labels~.
+
+
+Below is a good way (non-destructive) to flip the dotted pair atoms, which we used in ~wason-deck~ above:
 
 #+begin_src lisp :results raw
 (mapcar (lambda (pair)
