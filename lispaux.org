@@ -1,4 +1,4 @@
-# -*- org-confirm-babel-evaluate: t -*-
+# # -*- org-confirm-babel-evaluate: t -*-
 #+TITLE: \zwnj^{147}Pm Lisp
 #+AUTHOR: 147Pm
 #+EMAIL: borgauf@sdf.org
@@ -115,45 +115,112 @@ My Wason card tricks:
 
 #+begin_src lisp :results silent
 (defun wason-deck2 (&optional (p 0))
-  "This `consolst` and `vowlist` building is unnecessary, but a good exercise"
-  (let* ((alphab '(a b c d e f g h i j k l m n o p q r s t u v w x y z))
-         (consonents '(b c d f g h j k l m n p q r s t v w x y z))
-         (consolst (remove 'NIL (mapcar (lambda (x) (find x consonents)) alphab)))
-         (vowlst (remove 'NIL (mapcar (lambda (x) (find x '(a e i o))) alphab)))
+  (let* ((consonents '(b c d f g h j k l m n p q r s t v w x y z))
+         (vowels '(a e i o u))
+         (conso-deck (mapcar (lambda (x)
+                               (cons x (1+ (* 2 (random 27)))))
+                             consonents))
+         (vowel-deck (mapcar (lambda (x)
+                               (cons x (* 2 (random 27))))
+                             vowels))
          (wdeck '()))
 
-    (labels ((make-consodeck ()
-               (mapcar (lambda (x) (let ((num (random 54)))
-                                     (cons x (if (evenp num)
-                                                 (1+ num)
-                                                 num)))) consolst))
-             (make-voweldeck () 
-               (mapcar (lambda (x) (let ((num (random 54)))
-                                     (cons x (if (oddp num)
-                                                 (1+ num)
-                                                 num)))) vowlst))
-             (swap (slst el1 el2)
+    (labels ((swap (slst el1 el2)
                (let  ((tmp (elt slst el1)))
                  (setf (elt slst el1) (elt slst el2))
                  (setf (elt slst el2) tmp)))
 
              (shuffle (slst)
-               (loop for i in (reverse (range (length slst) :min 1))
+               (loop for i :from (1- (length slst)) :downto 1
                   do (let ((j (random (+ i 1))))
                        (swap slst i j)))
                slst)
+
              (flip (flst)
                (mapcar (lambda (x) (let ((num (random 2)))
                                      (if (zerop num)
                                          (cons (cdr x) (car x))
                                          x))) flst)))
-      (setf wdeck (flip (shuffle (append (make-consodeck) (make-voweldeck)))))
-      
-      (if (zerop p) wdeck
-          (mapcar (lambda (x) (let ((num (random 6)))
-                                (cond ((and (zerop num) (numberp (car x))) (cons (1+ (car x)) (cdr x)))
-                                      ((and (zerop num) (numberp (cdr x))) (cons (car x) (1+ (cdr x))))
-                                      (t x)))) wdeck)))))
+
+      (setf wdeck (flip (shuffle (append conso-deck vowel-deck)))))
+    
+    (if (zerop p) wdeck
+        (mapcar (lambda (x) (let ((num (random 6)))
+                              (cond ((and (zerop num) (numberp (car x))) (cons (1+ (car x)) (cdr x)))
+                                    ((and (zerop num) (numberp (cdr x))) (cons (car x) (1+ (cdr x))))
+                                    (t x)))) wdeck))))
+#+end_src
+
+#+begin_src lisp :results silent
+(defun wason-deck3 (&optional (p 0))
+  (let* ((consonents '(b c d f g h j k l m n p q r s t v w x y z))
+         (vowels '(a e i o u))
+         (conso-deck (mapcar (lambda (x)
+                               (cons x (1+ (* 2 (random 27)))))
+                             consonents))
+         (vowel-deck (mapcar (lambda (x)
+                               (cons x (* 2 (random 27))))
+                             vowels))
+         (wdeck '()))
+    (labels
+        ((shuffle (slst)
+           (loop :for i :from (1- (length slst)) :downto 1
+              :do (rotatef (nth i slst)
+                           (nth (random (1+ i)) slst)))
+                           slst)
+         
+         (flip (flst)
+           (mapcar (lambda (x) (let ((num (random 2)))
+                                 (if (zerop num)
+                                     (cons (cdr x) (car x))
+                                     x))) flst)))
+
+      (setf wdeck (flip (shuffle (append conso-deck vowel-deck)))))
+    
+    (if (zerop p) wdeck
+        (mapcar (lambda (x) (let ((num (random 6)))
+                              (cond ((and (zerop num) (numberp (car x))) (cons (1+ (car x)) (cdr x)))
+                                    ((and (zerop num) (numberp (cdr x))) (cons (car x) (1+ (cdr x))))
+                                    (t x)))) wdeck))))
+#+end_src
+
+#+begin_src lisp :results silent
+(defun myshuffle (slst)
+         (loop :for i :from (1- (length slst)) :downto 1
+            :do (rotatef (nth i slst)
+                         (nth (random (1+ i)) slst))))
+#+end_src
+
+#+begin_src lisp :results silent
+(defun cxr-symbol-to-cxr-list (s)
+  (labels ((collect (l)
+             (if l
+                 (list*
+                  1
+                  (if (char= (car l) #\A)
+                      'A
+                      'D)
+                  (collect (cdr l))))))
+    (collect
+        (cdr       ; chop off C
+         (butlast ; chop off R
+          (coerce
+           (symbol-name s)
+           'list))))))
+#+end_src
+
+
+#+begin_src lisp
+(defun collect-leaves (tree)
+  (let ((leaves ()))
+    (labels ((walk (tree)
+               (cond
+                 ((null tree))
+                 ((atom tree) (push tree leaves))
+                 (t (walk (car tree))
+                    (walk (cdr tree))))))
+      (walk tree))
+    (nreverse leaves)))
 #+end_src
 
 \rightarrow 2017-11-30T15:30:04 ~flet~ and ~labels~
