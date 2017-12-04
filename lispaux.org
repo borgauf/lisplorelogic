@@ -39,7 +39,7 @@
 
 \rightarrow 2017-11-29T10:44:48 details of Wason deck
 
-From [[http://jtra.cz/stuff/lisp/sclr/flet.html][Jakub Trávník]]:
+~flet~ example from [[http://jtra.cz/stuff/lisp/sclr/flet.html][Jakub Trávník]]:
 
 #+begin_src lisp :results silent
 (flet ((sin2x (x) (sin (* 2 x)))
@@ -185,12 +185,46 @@ My Wason card tricks:
 #+end_src
 
 #+begin_src lisp :results silent
+(defun wason-deck4 (&optional (p 0))
+  (labels
+      ((shuffle (slst)
+         (loop :for i :from (1- (length slst)) :downto 1
+            :do (rotatef (nth i slst)
+                         (nth (random (1+ i)) slst)))
+         slst)
+       
+       (flip (flst)
+         (mapcar (lambda (x) (let ((num (random 2)))
+                               (if (zerop num)
+                                   (cons (cdr x) (car x))
+                                   x))) flst)))
+    (let* ((consonents '(b c d f g h j k l m n p q r s t v w x y z))
+           (vowels '(a e i o u))
+           (conso-deck (mapcar (lambda (x)
+                                 (cons x (1+ (* 2 (random 27)))))
+                               consonents))
+           (vowel-deck (mapcar (lambda (x)
+                                 (cons x (* 2 (random 27))))
+                               vowels))
+           (wdeck (flip (shuffle (append conso-deck vowel-deck)))))
+      
+      (if (zerop p) wdeck
+          (mapcar (lambda (x) (let ((num (random 6)))
+                                (cond ((and (zerop num) (numberp (car x))) (cons (1+ (car x)) (cdr x)))
+                                      ((and (zerop num) (numberp (cdr x))) (cons (car x) (1+ (cdr x))))
+                                      (t x)))) wdeck)))))
+#+end_src
+
+
+
+#+begin_src lisp :results silent
 (defun myshuffle (slst)
          (loop :for i :from (1- (length slst)) :downto 1
             :do (rotatef (nth i slst)
                          (nth (random (1+ i)) slst))))
 #+end_src
 
+#+name:practice
 #+begin_src lisp :results silent
 (defun cxr-symbol-to-cxr-list (s)
   (labels ((collect (l)
@@ -209,6 +243,13 @@ My Wason card tricks:
            'list))))))
 #+end_src
 
+#+name:practice
+#+begin_src lisp :results silent
+(labels
+    ((shuffle …)
+     (flip …))
+  (let ((consonants …) … (wdeck (flip (…))))))
+#+end_src
 
 #+begin_src lisp
 (defun collect-leaves (tree)
