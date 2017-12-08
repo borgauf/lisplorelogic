@@ -53,7 +53,7 @@
 
 ~flet~ example from [[http://jtra.cz/stuff/lisp/sclr/flet.html][Jakub Trávník]]:
 
-#+name:practice
+#+name:p2017-12-07T15:09:42
 #+begin_src lisp :results silent
 (flet ((sin2x (x) (sin (* 2 x)))
        (cos2x (x) (cos (* 2 x))))
@@ -64,7 +64,7 @@
 
 Basic creation of an odd (non-even) random number:
 
-#+name:practice
+#+name:p2017-12-07T15:09:53
 #+begin_src lisp
 (defun random-odd ()
 "Basic creation of an odd (non-even) random number"
@@ -75,7 +75,7 @@ Basic creation of an odd (non-even) random number:
 (random-odd)
 #+end_src
 
-#+name:practice
+#+name:p2017-12-07T15:10:03
 #+begin_src lisp :results silent
 (defun swap (lst el1 el2)
   "in lst swap indices el1 and el2 in place (~elt~ similar to ~nth~)"
@@ -84,7 +84,7 @@ Basic creation of an odd (non-even) random number:
     (setf (elt lst el2) tmp)))
 #+end_src
 
-#+name:practice
+#+name:p2017-12-07T15:10:27
 #+begin_src lisp :results silent
 (defun shuffle (lst)
   "Shuffle the elements in lst.
@@ -97,7 +97,7 @@ shuffling is done in place."
 
 A sequence generator in the [[http://kitchingroup.cheme.cmu.edu/blog/2014/09/06/Randomize-a-list-in-Emacs/][original]] ~shuffle~ code used elisp's  ~number-sequence~. We replace with [[https://stackoverflow.com/questions/13937520/pythons-range-analog-in-common-lisp][this]] ~range~:
 
-#+name:practice
+#+name:p2017-12-07T15:10:35
 #+begin_src lisp :results silent
 (defun range (max &key (min 0) (step 1))
   (loop for n from min below max by step
@@ -138,7 +138,7 @@ My Wason card tricks:
 #+end_src
 
 
-#+name:practice
+#+name:p2017-12-07T15:10:48
 #+begin_src lisp :results silent
 (defun myshuffle (slst)
          (loop :for i :from (1- (length slst)) :downto 1
@@ -146,7 +146,7 @@ My Wason card tricks:
                          (nth (random (1+ i)) slst))))
 #+end_src
 
-#+name:practice
+#+name:p2017-12-07T15:10:59
 #+begin_src lisp :results silent
 (defun cxr-symbol-to-cxr-list (s)
   (labels ((collect (l)
@@ -165,7 +165,7 @@ My Wason card tricks:
            'list))))))
 #+end_src
 
-#+name:practice
+#+name:p2017-12-07T15:11:07
 #+begin_src lisp :results silent
 (labels
     ((shuffle …)
@@ -204,6 +204,56 @@ Below is a good way (non-destructive) to flip the dotted pair atoms, which we us
 
 Now we need to randomly "flip" the cards, which means reverse the atoms in the dotted pairs.
 
+\rightarrow 2017-12-07T10:16:36 ~struct~
+
+#+name:p2017-12-07T15:08:41
+#+begin_src lisp
+(defparameter *default-ship-mass* 4.5)
+#+end_src
+
+#+name:p2017-12-07T15:26:02
+#+begin_src lisp
+(defstruct ship2.0 
+  (x-position 0.0 :type short-float) 
+  (y-position 0.0 :type short-float) 
+  (x-velocity 0.0 :type short-float) 
+  (y-velocity 0.0 :type short-float) 
+  (mass *default-ship-mass* :type short-float :read-only t))
+#+end_src
+
+
+
+#+RESULTS: p2017-12-07T15:11:29
+: #S(SHIP2.0
+:    :X-POSITION 0.0
+:    :Y-POSITION 0.0
+:    :X-VELOCITY 0.0
+:    :Y-VELOCITY 0.0
+:    :MASS 4.52)
+
+#+name:p2017-12-07T15:11:29
+#+begin_src lisp
+(setq ship2.0.1 (make-ship2.0 :mass 4.52 
+                              :x-position 0.0 
+                              :y-position 0.0))
+#+end_src
+
+
+Use ~setf~ to alter the components of a ~ship~ object:
+
+#+name:p2017-12-07T11:19:51
+#+begin_src lisp :exports both
+(setf (ship2.0-x-position ship2.0.1) 100.1)
+(print ship2.0.1)
+#+end_src
+
+#+RESULTS: p2017-12-07T11:19:51
+: #S(SHIP2.0
+:    :X-POSITION 100.1
+:    :Y-POSITION 0.0
+:    :X-VELOCITY 0.0
+:    :Y-VELOCITY 0.0
+:    :MASS 4.52)
 
 
 
